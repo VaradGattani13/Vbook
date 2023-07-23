@@ -1,2 +1,14 @@
 backend/node_modules
+# .env
 # node_modules
+
+# git remote add origin https://github.com/VaradGattani13/Vbook.git
+# git branch -M main
+# git push -u origin main
+
+backend/.env
+aa.c++
+aa.exe 
+dsu.c++
+dsu.exe
+client/node_modules

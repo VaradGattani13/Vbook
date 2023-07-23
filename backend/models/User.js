@@ -37,9 +37,13 @@ UserSchema.pre('save',async function(next){
 
 
 // Verify User
-// UserSchema.methods.isPassword=async function(entreredPassword)=>{
+// Ispasswrod match function hai
+UserSchema.methods.isPasswordMatch=async function(entreredPassword){
 
-// }
+
+return await brcypt.compare(entreredPassword,this.password);
+
+}
 
 
 

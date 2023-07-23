@@ -3,6 +3,8 @@ const userRouter=express.Router();
 const User=require('../models/User')
 
 const asynchandler=require('express-async-handler');
+const generateToken = require('../utils/generateToken');
+const authMiddlware = require('../middlewares/authMiddleware');
 userRouter.post("/register",asynchandler(async(req,res)=>{
 
     // Async Hadler
@@ -34,15 +36,33 @@ userRouter.post("/register",asynchandler(async(req,res)=>{
     //     console.log(err);
          
     // } 
-    res.send(userCreated)
- 
+    // res.send(userCreated)
+        res.json({
+            _id:userCreated._id,
+            email:userCreated.email,
+            password:userCreated.password,
+            name:userCreated.name,
+            token:userCreated.token,
+        })
   
 })
 )
-userRouter.get("/api/users",(req,res)=>{
-    res.send('User Added');
 
-})
+
+
+
+
+// Get All users
+userRouter.get('/usersList', async function (req, res) {
+  try {
+    // console.log("BFERFER")
+    const users = await User.find(); // Assuming you want to find a single user document
+    res.send(users);
+  } catch (err) {
+    console.error('Error finding user:', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 userRouter.post("/login",asynchandler(async(req,res)=>{
     // res.send('Login Route')
@@ -50,13 +70,14 @@ userRouter.post("/login",asynchandler(async(req,res)=>{
 
 const {email,password}=req.body;
 const user=await User.findOne({email});
-    if(user){
+    if(user && (await user.isPasswordMatch(password))){
         res.status(200);
         res.json({
             _id:user._id,
             name:user.name,
             email:user.email,
-            password:user.password
+            password:user.password,
+            token:generateToken(user._id)
         })
     }
     else{
@@ -70,10 +91,37 @@ const user=await User.findOne({email});
 
 }))
 
-//Updating user
-userRouter.put("/register",(req,res)=>{
-    res.send('Update Route')
-})
+//Updating user ->Iski details dekhna Padegi ek bar
+
+userRouter.put(    
+    '/profile/update',
+    authMiddlware,
+    asynchandler(async (req, res) => {
+      const user = await User.findById(req.user._id);
+      if (user) {
+        user.name = req.body.name || user.name;
+        user.email = req.body.email || user.email;
+        //This will encrypt automatically in our model
+        if (req.body.password) {
+          user.password = req.body.password || user.password;
+        }
+        const updateUser = await user.save();
+        res.json({
+          _id: updateUser._id,
+          name: updateUser.name,
+          password: updateUser.password,
+          email: updateUser.email,
+          token: generateToken(updateUser._id),
+        });
+      } else {
+        res.status(401);
+        throw new Error('User Not found');
+      }
+    })
+  );
+  
+
+
 
 
 

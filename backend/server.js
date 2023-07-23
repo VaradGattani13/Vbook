@@ -8,7 +8,8 @@ const dbConnect = require('./config/dbConnect');
 // const User = require('./models/User.js');
 const userRoutes=require('./routes/userRoutes.js')
 const asynchandler=require('express-async-handler');
-
+const bookRouter = require('./routes/bookRoutes');
+const cors=require('cors');
 
 
 // Other wayto call db
@@ -17,7 +18,7 @@ const asynchandler=require('express-async-handler');
 // Connecting Db;
 dbConnect();
 
-
+app.use(cors());
 
 
 
@@ -31,15 +32,18 @@ app.use(error.errorMiddleware);
 
 
 
-
+// User Routes
 app.use("/api/users",userRoutes)  
 
+// Book Routes
+app.use('/api/books',bookRouter);
 
 
 
 
 
-app.get("/",(req,res)=>{
+
+app.get("/",(req,res)=>{  
     res.send("Hello")
 })
 
